@@ -1,0 +1,850 @@
+
+<div class="dashboard-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="school-brand">
+      <div class="school-logo">S</div>
+      <div>
+        <h2>EduManage</h2>
+        <p>School Administration</p>
+      </div>
+    </div>
+
+    <p class="menu-heading">MAIN MENU</p>
+
+    <nav class="sidebar-nav">
+      <a href="#dashboard" class="nav-link active">
+        <span>▦</span> Dashboard
+      </a>
+      <a href="#students" class="nav-link">
+        <span>♙</span> Students
+      </a>
+      <a href="#courses" class="nav-link">
+        <span>▣</span> Courses
+      </a>
+      <a href="#recent-students" class="nav-link">
+        <span>▤</span> Recent Students
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <p>Student Management System</p>
+      <small>Academic Administration</small>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- SUCCESS / ERROR NOTIFICATION -->
+    @if (notificationMessage) {
+      <div
+        class="app-notification"
+        [class.success-notification]="notificationType === 'success'"
+        [class.error-notification]="notificationType === 'error'"
+        [attr.role]="notificationType === 'error' ? 'alert' : 'status'">
+
+        <div class="notification-content">
+          <span class="notification-icon">
+            {{ notificationType === 'success' ? '✓' : '!' }}
+          </span>
+
+          <span>{{ notificationMessage }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="notification-close"
+          aria-label="Close notification"
+          (click)="closeNotification()">
+          ×
+        </button>
+      </div>
+    }
+
+    <header class="topbar">
+      <div>
+        <h2>Dashboard</h2>
+        <p>Welcome to your school administration panel</p>
+      </div>
+
+      <div class="admin-profile">
+        <div class="profile-circle">A</div>
+        <div>
+          <strong>Administrator</strong>
+          <small>School Admin</small>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard -->
+    <section class="dashboard-content" id="dashboard">
+
+      <div class="page-heading">
+        <div>
+          <h1>School Overview</h1>
+          <p>Here's what's happening in your school today.</p>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue-icon">♙</div>
+          <div>
+            <p>Total Students</p>
+            <h2>{{ students.length }}</h2>
+            <small>Registered students</small>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon purple-icon">▤</div>
+          <div>
+            <p>Total Courses</p>
+            <h2>{{ courses.length }}</h2>
+            <small>Courses offered</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Enrolment Chart -->
+      <section class="enrollment-section">
+        <div class="section-heading">
+          <div>
+            <h2>Student Enrolment Overview</h2>
+            <p>Number of students enrolled in each course</p>
+          </div>
+
+          <span class="enrollment-total">
+            Total: {{ totalEnrolments }} Students
+          </span>
+        </div>
+
+        @if (enrollmentChartData.length > 0) {
+          <div class="enrollment-chart">
+
+            @for (item of enrollmentChartData; track item.courseName) {
+              <div class="enrollment-chart-row">
+
+                <div class="enrollment-chart-label">
+                  <strong>{{ item.courseName }}</strong>
+                  <span>{{ item.count }} students</span>
+                </div>
+
+                <div class="enrollment-bar-background">
+                  <div
+                    class="enrollment-bar"
+                    [style.width.%]="item.percentage">
+                  </div>
+                </div>
+
+              </div>
+            }
+
+          </div>
+        } @else {
+          <p class="recent-empty-message">
+            Add courses to view student enrolment statistics.
+          </p>
+        }
+      </section>
+
+      <!-- Recent Students -->
+      <section class="recent-students-section" id="recent-students">
+        <div class="section-heading">
+          <div>
+            <h2>Recent Students</h2>
+            <p>Recently added student records</p>
+          </div>
+
+          <a href="#students" class="secondary-button">
+            View All Students
+          </a>
+        </div>
+
+        @if (students.length > 0) {
+          <div class="recent-students-list">
+            @for (student of students.slice().reverse().slice(0, 5); track student.id) {
+              <div class="recent-student-item">
+                <div class="recent-student-avatar">
+                  {{ student.name.charAt(0).toUpperCase() }}
+                </div>
+
+                <div class="recent-student-info">
+                  <strong>{{ student.name }}</strong>
+                  <small>{{ student.email }}</small>
+                </div>
+
+                <span class="course-badge">
+                  {{ student.course }}
+                </span>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="recent-empty-message">
+            No student records available yet.
+          </p>
+        }
+      </section>
+
+      <!-- Student Management -->
+      <section class="records-section" id="students">
+        <div class="section-heading">
+          <div>
+            <h2>Student Management</h2>
+            <p>Manage and maintain student information</p>
+          </div>
+
+          <button
+            class="primary-button"
+            type="button"
+            (click)="showForm = !showForm">
+            + Add New Student
+          </button>
+        </div>
+
+        <!-- Add Student Form -->
+        @if (showForm) {
+          <form
+            class="student-form"
+            #addForm="ngForm"
+            (ngSubmit)="addStudent()"
+            novalidate>
+
+            <h3>Add New Student</h3>
+
+            <div class="form-grid">
+
+              <div>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Student Name"
+                  [(ngModel)]="newStudent.name"
+                  #studentName="ngModel"
+                  required
+                  minlength="2"
+                  pattern="[a-zA-Z ]+" />
+
+                @if (studentName.invalid && studentName.touched) {
+                  <small class="validation-error">
+                    @if (studentName.errors?.['required']) {
+                      Student name is required.
+                    } @else if (studentName.errors?.['minlength']) {
+                      Name must contain at least 2 characters.
+                    } @else if (studentName.errors?.['pattern']) {
+                      Name should contain only letters and spaces.
+                    }
+                  </small>
+                }
+              </div>
+
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  [(ngModel)]="newStudent.email"
+                  #studentEmail="ngModel"
+                  required
+                  email />
+
+                @if (studentEmail.invalid && studentEmail.touched) {
+                  <small class="validation-error">
+                    @if (studentEmail.errors?.['required']) {
+                      Email address is required.
+                    } @else {
+                      Enter a valid email address.
+                    }
+                  </small>
+                }
+              </div>
+
+              <!-- Course Dropdown - Alphabetical Order -->
+              <div>
+                <select
+                  name="course"
+                  [(ngModel)]="newStudent.course"
+                  #studentCourse="ngModel"
+                  required>
+
+                  <option value="" disabled>Select a Course</option>
+
+                  @for (course of getUniqueCourses(); track course) {
+                    <option [value]="course">
+                      {{ course }}
+                    </option>
+                  }
+                </select>
+
+                @if (studentCourse.invalid && studentCourse.touched) {
+                  <small class="validation-error">
+                    Please select a course.
+                  </small>
+                }
+
+                @if (courses.length === 0) {
+                  <small class="validation-error">
+                    Please add a course in Course Management first.
+                  </small>
+                }
+              </div>
+
+              <div>
+                <input
+                  type="number"
+                  name="age"
+                  placeholder="Age"
+                  [(ngModel)]="newStudent.age"
+                  #studentAge="ngModel"
+                  required
+                  min="1"
+                  max="100"
+                  step="1" />
+
+                @if (studentAge.invalid && studentAge.touched) {
+                  <small class="validation-error">
+                    @if (studentAge.errors?.['required']) {
+                      Age is required.
+                    } @else {
+                      Age must be between 1 and 100.
+                    }
+                  </small>
+                }
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="addForm.invalid || courses.length === 0">
+              Save Student
+            </button>
+          </form>
+        }
+
+        <!-- Edit Student Form -->
+        @if (editingStudentId !== null) {
+          <form
+            class="student-form"
+            #editForm="ngForm"
+            (ngSubmit)="saveEdit()"
+            novalidate>
+
+            <h3>Edit Student Details</h3>
+
+            <div class="form-grid">
+
+              <div>
+                <input
+                  type="text"
+                  name="editName"
+                  placeholder="Student Name"
+                  [(ngModel)]="editedStudent.name"
+                  #editName="ngModel"
+                  required
+                  minlength="2"
+                  pattern="[a-zA-Z ]+" />
+
+                @if (editName.invalid && editName.touched) {
+                  <small class="validation-error">
+                    Please enter a valid student name.
+                  </small>
+                }
+              </div>
+
+              <div>
+                <input
+                  type="email"
+                  name="editEmail"
+                  placeholder="Email Address"
+                  [(ngModel)]="editedStudent.email"
+                  #editEmail="ngModel"
+                  required
+                  email />
+
+                @if (editEmail.invalid && editEmail.touched) {
+                  <small class="validation-error">
+                    Please enter a valid email address.
+                  </small>
+                }
+              </div>
+
+              <!-- Edit Course Dropdown - Alphabetical Order -->
+              <div>
+                <select
+                  name="editCourse"
+                  [(ngModel)]="editedStudent.course"
+                  #editCourse="ngModel"
+                  required>
+
+                  <option value="" disabled>Select a Course</option>
+
+                  @for (course of getUniqueCourses(); track course) {
+                    <option [value]="course">
+                      {{ course }}
+                    </option>
+                  }
+                </select>
+
+                @if (editCourse.invalid && editCourse.touched) {
+                  <small class="validation-error">
+                    Please select a course.
+                  </small>
+                }
+              </div>
+
+              <div>
+                <input
+                  type="number"
+                  name="editAge"
+                  placeholder="Age"
+                  [(ngModel)]="editedStudent.age"
+                  #editAge="ngModel"
+                  required
+                  min="1"
+                  max="100"
+                  step="1" />
+
+                @if (editAge.invalid && editAge.touched) {
+                  <small class="validation-error">
+                    Age must be between 1 and 100.
+                  </small>
+                }
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="editForm.invalid">
+              Save Changes
+            </button>
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="cancelEdit()">
+              Cancel
+            </button>
+          </form>
+        }
+
+        <!-- Student Search -->
+        <div class="search-container">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search by student name, email, or course..."
+            [(ngModel)]="searchText" />
+        </div>
+
+        <!-- Course Filter -->
+        <div class="filter-container">
+          <label for="courseFilter">Filter by Course:</label>
+
+          <select
+            id="courseFilter"
+            class="filter-select"
+            [(ngModel)]="selectedCourse"
+            name="courseFilter">
+
+            <option value="All">All Courses</option>
+
+            @for (course of getUniqueCourses(); track course) {
+              <option [value]="course">
+                {{ course }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <!-- Student Table -->
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>STUDENT ID</th>
+                <th>STUDENT NAME</th>
+                <th>EMAIL ADDRESS</th>
+                <th>COURSE</th>
+                <th>AGE</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (student of filteredStudents; track student.id) {
+                <tr>
+                  <td>#{{ student.id }}</td>
+
+                  <td class="student-name">
+                    {{ student.name }}
+                  </td>
+
+                  <td>{{ student.email }}</td>
+
+                  <td>
+                    <span class="course-badge">
+                      {{ student.course }}
+                    </span>
+                  </td>
+
+                  <td>{{ student.age }}</td>
+
+                  <td class="action-buttons">
+                    <button
+                      type="button"
+                      class="view-button"
+                      (click)="viewStudent(student)">
+                      View
+                    </button>
+
+                    <button
+                      type="button"
+                      class="edit-button"
+                      (click)="startEdit(student)">
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      class="delete-button"
+                      (click)="deleteStudent(student.id!)">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty-message">
+                    No matching student records found.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Course Management -->
+      <section class="records-section courses-section" id="courses">
+        <div class="section-heading">
+          <div>
+            <h2>Course Management</h2>
+            <p>Create and manage the courses offered by your school</p>
+          </div>
+
+          <button
+            class="primary-button"
+            type="button"
+            (click)="showCourseForm = !showCourseForm; editingCourseId = null">
+            + Add New Course
+          </button>
+        </div>
+
+        <!-- Add Course Form -->
+        @if (showCourseForm) {
+          <form
+            class="student-form"
+            #courseForm="ngForm"
+            (ngSubmit)="addCourse()"
+            novalidate>
+
+            <h3>Add New Course</h3>
+
+            <div class="form-grid">
+              <div>
+                <input
+                  type="text"
+                  name="courseName"
+                  placeholder="Course Name"
+                  [(ngModel)]="newCourse.name"
+                  #courseName="ngModel"
+                  required
+                  minlength="2" />
+
+                @if (courseName.invalid && courseName.touched) {
+                  <small class="validation-error">
+                    Course name must contain at least 2 characters.
+                  </small>
+                }
+              </div>
+
+              <div>
+                <input
+                  type="number"
+                  name="courseDuration"
+                  placeholder="Duration (months)"
+                  [(ngModel)]="newCourse.duration"
+                  #courseDuration="ngModel"
+                  required
+                  min="1"
+                  max="120"
+                  step="1" />
+
+                @if (courseDuration.invalid && courseDuration.touched) {
+                  <small class="validation-error">
+                    Duration must be between 1 and 120 months.
+                  </small>
+                }
+              </div>
+
+              <div class="full-width-field">
+                <textarea
+                  name="courseDescription"
+                  placeholder="Course Description"
+                  [(ngModel)]="newCourse.description"
+                  #courseDescription="ngModel"
+                  required
+                  minlength="5"
+                  rows="3"></textarea>
+
+                @if (courseDescription.invalid && courseDescription.touched) {
+                  <small class="validation-error">
+                    Please enter a description of at least 5 characters.
+                  </small>
+                }
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="courseForm.invalid">
+              Save Course
+            </button>
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="cancelCourseForm()">
+              Cancel
+            </button>
+          </form>
+        }
+
+        <!-- Edit Course Form -->
+        @if (editingCourseId !== null) {
+          <form
+            class="student-form"
+            #editCourseForm="ngForm"
+            (ngSubmit)="saveCourseEdit()"
+            novalidate>
+
+            <h3>Edit Course</h3>
+
+            <div class="form-grid">
+              <div>
+                <input
+                  type="text"
+                  name="editCourseName"
+                  placeholder="Course Name"
+                  [(ngModel)]="editedCourse.name"
+                  #editCourseName="ngModel"
+                  required
+                  minlength="2" />
+
+                @if (editCourseName.invalid && editCourseName.touched) {
+                  <small class="validation-error">
+                    Please enter a valid course name.
+                  </small>
+                }
+              </div>
+
+              <div>
+                <input
+                  type="number"
+                  name="editCourseDuration"
+                  placeholder="Duration (months)"
+                  [(ngModel)]="editedCourse.duration"
+                  #editCourseDuration="ngModel"
+                  required
+                  min="1"
+                  max="120"
+                  step="1" />
+
+                @if (editCourseDuration.invalid && editCourseDuration.touched) {
+                  <small class="validation-error">
+                    Duration must be between 1 and 120 months.
+                  </small>
+                }
+              </div>
+
+              <div class="full-width-field">
+                <textarea
+                  name="editCourseDescription"
+                  placeholder="Course Description"
+                  [(ngModel)]="editedCourse.description"
+                  #editCourseDescription="ngModel"
+                  required
+                  minlength="5"
+                  rows="3"></textarea>
+
+                @if (editCourseDescription.invalid && editCourseDescription.touched) {
+                  <small class="validation-error">
+                    Please enter a valid description.
+                  </small>
+                }
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="editCourseForm.invalid">
+              Save Changes
+            </button>
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="cancelCourseEdit()">
+              Cancel
+            </button>
+          </form>
+        }
+
+        <!-- Course Search -->
+        <div class="search-container">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search courses by name or description..."
+            [(ngModel)]="courseSearchText" />
+        </div>
+
+        <!-- Course Table -->
+        <div class="table-container">
+          <table class="courses-table">
+            <thead>
+              <tr>
+                <th>COURSE ID</th>
+                <th>COURSE NAME</th>
+                <th>DESCRIPTION</th>
+                <th>DURATION</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (course of filteredCourses; track course.id) {
+                <tr>
+                  <td>#{{ course.id }}</td>
+                  <td class="student-name">{{ course.name }}</td>
+                  <td class="course-description-cell">
+                    {{ course.description }}
+                  </td>
+                  <td>{{ course.duration }} months</td>
+
+                  <td class="action-buttons">
+                    <button
+                      type="button"
+                      class="edit-button"
+                      (click)="startCourseEdit(course)">
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      class="delete-button"
+                      (click)="deleteCourse(course.id!)">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="empty-message">
+                    @if (courseSearchText) {
+                      No matching courses found.
+                    } @else {
+                      No courses have been added yet.
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="dashboard-footer">
+        Student Management System · School Administration
+      </footer>
+
+    </section>
+  </main>
+</div>
+
+<!-- Student Details Popup -->
+@if (selectedStudent) {
+  <div class="details-overlay" (click)="closeStudentDetails()">
+    <div
+      class="details-modal"
+      (click)="$event.stopPropagation()">
+
+      <div class="details-header">
+        <div>
+          <h2>Student Profile</h2>
+          <p>Complete student information</p>
+        </div>
+
+        <button
+          type="button"
+          class="close-details-button"
+          (click)="closeStudentDetails()">
+          ×
+        </button>
+      </div>
+
+      <div class="details-profile">
+        <div class="details-avatar">
+          {{ selectedStudent.name.charAt(0).toUpperCase() }}
+        </div>
+        <h3>{{ selectedStudent.name }}</h3>
+      </div>
+
+      <div class="details-information">
+        <div class="detail-item">
+          <span>Student ID</span>
+          <strong>#{{ selectedStudent.id }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Full Name</span>
+          <strong>{{ selectedStudent.name }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Email Address</span>
+          <strong>{{ selectedStudent.email }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Course</span>
+          <strong>{{ selectedStudent.course }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Age</span>
+          <strong>{{ selectedStudent.age }} years</strong>
+        </div>
+      </div>
+
+      <div class="details-footer">
+        <button
+          type="button"
+          class="primary-button"
+          (click)="closeStudentDetails()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<router-outlet />

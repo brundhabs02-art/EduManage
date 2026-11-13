@@ -1,0 +1,23 @@
+# Frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+Frontend/coverage/
+
+# Backend
+Backend/bin/
+Backend/obj/
+
+# Private credentials
+**/.env
+**/.env.*
+
+# IDE files
+.vscode/
+.vs/
+.idea/
+
+# Protect database configuration
+Backend/appsettings.json
+Backend/appsettings.Development.json
+Backend/appsettings.*.json

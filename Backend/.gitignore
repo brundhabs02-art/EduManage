@@ -1,0 +1,22 @@
+
+# Angular dependencies and build files
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+Frontend/coverage/
+
+# .NET build files
+Backend/bin/
+Backend/obj/
+
+# Private configuration and credentials
+Backend/appsettings*.json
+**/.env
+**/.env.*
+
+# IDE and operating system files
+.vscode/
+.vs/
+.idea/
+.DS_Store
+Thumbs.db
