@@ -23,7 +23,7 @@ export interface Course {
 })
 export class StudentService {
 
-  private apiUrl = 'http://10.209.0.172:5010/api/students';
+  private apiUrl = '/api/students';
 
   constructor(private http: HttpClient) {}
 
@@ -49,7 +49,7 @@ export class StudentService {
 })
 export class CourseService {
 
-  private apiUrl = 'http://10.209.0.172:5010/api/courses';
+  private apiUrl = '/api/courses';
 
   constructor(private http: HttpClient) {}
 
